@@ -1,0 +1,33 @@
+name: "YouTube Downloader"
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'لینک ویدیو یوتیوب'
+        required: true
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install yt-dlp
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip ffmpeg
+          pip3 install yt-dlp
+
+      - name: Download Video
+        run: |
+          yt-dlp -f best -o "video.%(ext)s" "${{ github.event.inputs.url }}"
+
+      - name: Push to Repo
+        run: |
+          git config user.name "github-actions"
+          git config user.email "action@github.com"
+          git add .
+          git commit -m "Add video" || echo "No changes"
+          git push
